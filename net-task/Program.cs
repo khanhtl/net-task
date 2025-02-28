@@ -3,8 +3,10 @@ using net_task;
 
 Console.WriteLine($"Start thread id: {Environment.CurrentManagedThreadId}");
 
-NetTask.Run(() => Console.WriteLine($"First NetTask thread id: {Environment.CurrentManagedThreadId}"));
-NetTask.Run(() => Console.WriteLine($"Second NetTask thread id: {Environment.CurrentManagedThreadId}"));
+NetTask
+    .Run(() => Console.WriteLine($"First NetTask thread id: {Environment.CurrentManagedThreadId}"))
+    .ContinueWith(() => Console.WriteLine($"Second NetTask thread id: {Environment.CurrentManagedThreadId}"));
+NetTask.Run(() => Console.WriteLine($"Third NetTask thread id: {Environment.CurrentManagedThreadId}"));
 
 
 Console.ReadLine();

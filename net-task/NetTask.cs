@@ -5,6 +5,8 @@ internal class NetTask
 
     private bool _completed;
     private Exception? _exception;
+    private Action? _action;
+    private ExecutionContext? _context;
     public bool IsCompleted
     {
         get
@@ -19,24 +21,46 @@ internal class NetTask
     public static NetTask Run(Action action)
     {
         var task = new NetTask();
-        try
+        ThreadPool.QueueUserWorkItem(_ =>
         {
-            ThreadPool.QueueUserWorkItem(_ =>
+            try
             {
-                try
-                {
-                    action();
-                    task.SetResult();
-                }
-                catch (Exception ex)
-                {
-                    task.SetException(ex);
-                }
-            });
-        }
-        catch (Exception ex)
-        {
+                action();
+                task.SetResult();
+            }
+            catch (Exception ex)
+            {
+                task.SetException(ex);
+            }
+        });
+        return task;
+    }
 
+    public NetTask ContinueWith(Action action)
+    {
+        var task = new NetTask();
+        lock(_lock)
+        {
+            if (_completed)
+            {
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    try
+                    {
+                        action();
+                        task.SetResult();
+                    }
+                    catch (Exception ex)
+                    {
+                        task.SetException(ex);
+                    }
+                });
+            }
+            else
+            {
+                _action = action;
+                _context = ExecutionContext.Capture();
+            }
         }
         return task;
     }
@@ -54,6 +78,18 @@ internal class NetTask
             }
             _completed = true;
             _exception = exception;
+
+            if(_action is not null )
+            {
+                if(_context is null)
+                {
+                    _action();
+                }
+                else
+                {
+                    ExecutionContext.Run(_context, state => ((Action?)state)?.Invoke(), _action);
+                }
+            }
         }
     }
 }
