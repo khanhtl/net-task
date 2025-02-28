@@ -1,4 +1,6 @@
-﻿namespace net_task;
+﻿using System.Runtime.ExceptionServices;
+
+namespace net_task;
 internal class NetTask
 {
     private readonly object _lock = new();
@@ -63,6 +65,27 @@ internal class NetTask
             }
         }
         return task;
+    }
+
+    public void Wait()
+    {
+        ManualResetEventSlim?  manualResetEventSlim = null;
+
+        lock (_lock)
+        {
+
+            if (!_completed)
+            {
+                manualResetEventSlim = new ManualResetEventSlim();
+                ContinueWith(() => manualResetEventSlim.Set());
+            }
+        }
+        manualResetEventSlim?.Wait();
+
+        if (_exception is not null)
+        {
+            ExceptionDispatchInfo.Throw(_exception);
+        }
     }
 
     public void SetException(Exception ex) => CompleteTask(ex);
