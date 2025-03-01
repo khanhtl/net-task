@@ -3,11 +3,17 @@ using net_task;
 
 Console.WriteLine($"Start thread id: {Environment.CurrentManagedThreadId}");
 
-NetTask.Run(() => Console.WriteLine($"First NetTask thread id: {Environment.CurrentManagedThreadId}")).Wait();
+NetTask.Run(() => Console.WriteLine($"First NetTask thread id: {Environment.CurrentManagedThreadId}"))
+    .Wait();
+
+NetTask.Delay(TimeSpan.FromSeconds(1))
+    .Wait();
 
 Console.WriteLine($"Second thread id: {Environment.CurrentManagedThreadId}");
-NetTask.Run(() => Console.WriteLine($"Third NetTask thread id: {Environment.CurrentManagedThreadId}"));
-NetTask.Run(() => Console.WriteLine($"Fourh NetTask thread id: {Environment.CurrentManagedThreadId}"));
 
+NetTask.Delay(TimeSpan.FromSeconds(1))
+    .Wait();
 
-Console.ReadLine();
+NetTask.Run(() => Console.WriteLine($"Third NetTask thread id: {Environment.CurrentManagedThreadId}"))
+    .Wait();
+

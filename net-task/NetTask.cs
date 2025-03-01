@@ -88,6 +88,14 @@ internal class NetTask
         }
     }
 
+    public static NetTask Delay(TimeSpan delay)
+    {
+        var task = new NetTask();
+
+        new Timer(_ => task.SetResult()).Change(delay, Timeout.InfiniteTimeSpan);
+        return task;
+    }
+
     public void SetException(Exception ex) => CompleteTask(ex);
     public void SetResult() => CompleteTask();
 
