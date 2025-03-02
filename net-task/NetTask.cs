@@ -1,7 +1,7 @@
 ﻿using System.Runtime.ExceptionServices;
 
 namespace net_task;
-internal class NetTask
+public class NetTask
 {
     private readonly object _lock = new();
 
@@ -87,6 +87,8 @@ internal class NetTask
             ExceptionDispatchInfo.Throw(_exception);
         }
     }
+
+    public NetTaskAwaiter GetAwaiter() => new(this);
 
     public static NetTask Delay(TimeSpan delay)
     {
